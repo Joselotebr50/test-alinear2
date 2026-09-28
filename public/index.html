@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3 Imagens → 1 Unidade</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0a;
+      color: white;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 60px 20px 40px;
+      background: linear-gradient(to bottom, #111, #0a0a0a);
+    }
+
+    .header h1 {
+      font-size: clamp(2rem, 6vw, 4rem);
+      background: linear-gradient(to right, #fbbf24, #f59e0b, #ea580c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+    }
+
+    .header p {
+      color: #9ca3af;
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* Upload Section */
+    .upload-section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    .upload-section h2 {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 12px;
+    }
+
+    .upload-section h2 span {
+      color: #fbbf24;
+    }
+
+    .upload-subtitle {
+      text-align: center;
+      color: #9ca3af;
+      margin-bottom: 40px;
+    }
+
+    .upload-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .upload-box {
+      position: relative;
+      border: 2px dashed #4b5563;
+      border-radius: 16px;
+      height: 220px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      background: rgba(31, 41, 55, 0.5);
+    }
+
+    .upload-box:hover {
+      border-color: #fbbf24;
+      background: rgba(31, 41, 55, 0.8);
+    }
+
+    .upload-box.has-image {
+      border-color: #fbbf24;
+      border-style: solid;
+      overflow: hidden;
+    }
+
+    .upload-box input[type="file"] {
+      display: none;
+    }
+
+    .upload-icon {
+      width: 60px;
+      height: 60px;
+      background: #374151;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      transition: background 0.3s;
+    }
+
+    .upload-box:hover .upload-icon {
+      background: rgba(251, 191, 36, 0.2);
+    }
+
+    .upload-icon svg {
+      width: 28px;
+      height: 28px;
+      color: #9ca3af;
+      transition: color 0.3s;
+    }
+
+    .upload-box:hover .upload-icon svg {
+      color: #fbbf24;
+    }
+
+    .upload-label {
+      color: #9ca3af;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .upload-box:hover .upload-label {
+      color: #fbbf24;
+    }
+
+    .upload-hint {
+      color: #6b7280;
+      font-size: 0.85rem;
+      margin-top: 4px;
+    }
+
+    .upload-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .upload-box .badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: #fbbf24;
+      color: black;
+      font-weight: bold;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+    }
+
+    .upload-box .remove-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: rgba(239, 68, 68, 0.9);
+      color: white;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .upload-box .remove-btn:hover {
+      background: #dc2626;
+    }
+
+    .upload-box .status {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 12px;
+      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+      color: #4ade80;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    /* Success message */
+    .success-msg {
+      text-align: center;
+      margin-top: 30px;
+      display: none;
+    }
+
+    .success-msg.show {
+      display: block;
+    }
+
+    .success-msg span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(74, 222, 128, 0.1);
+      border: 1px solid rgba(74, 222, 128, 0.3);
+      color: #4ade80;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-weight: 500;
+    }
+
+    /* Result Section */
+    .result-section {
+      padding: 60px 20px;
+      background: rgba(17, 24, 39, 0.5);
+      display: none;
+    }
+
+    .result-section.show {
+      display: block;
+    }
+
+    .result-section h2 {
+      text-align: center;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      margin-bottom: 12px;
+    }
+
+    .result-section h2 span {
+      color: #fbbf24;
+    }
+
+    .result-subtitle {
+      text-align: center;
+      color: #9ca3af;
+      margin-bottom: 40px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Composição unificada */
+    .composicao {
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 25px 50px rgba(251, 191, 36, 0.1);
+    }
+
+    .unidade-visual {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .unidade-visual .painel {
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.5s ease, z-index 0s;
+    }
+
+    .unidade-visual .painel img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: cover;
+      transition: filter 0.5s;
+    }
+
+    .unidade-visual .painel .overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.7), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      display: flex;
+      align-items: flex-end;
+      padding: 16px;
+    }
+
+    .unidade-visual .painel .overlay span {
+      background: rgba(251, 191, 36, 0.9);
+      color: black;
+      font-weight: bold;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+    }
+
+    /* Hover effects */
+    .composicao:hover .painel img {
+      filter: brightness(0.7) saturate(0.8);
+    }
+
+    .composicao:hover .painel:hover img {
+      filter: brightness(1) saturate(1);
+    }
+
+    .composicao:hover .painel:hover {
+      transform: scale(1.02);
+      z-index: 10;
+    }
+
+    .composicao:hover .painel:hover .overlay {
+      opacity: 1;
+    }
+
+    /* Divisórias */
+    .divisoria {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, transparent, rgba(251, 191, 36, 0.8), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+
+    .divisoria-1 { left: 33.333%; }
+    .divisoria-2 { left: 66.666%; }
+
+    .composicao:hover .divisoria {
+      opacity: 1;
+    }
+
+    /* Badge unidade */
+    .unidade-badge {
+      margin-top: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .unidade-badge .line {
+      flex: 1;
+      max-width: 200px;
+      height: 1px;
+    }
+
+    .unidade-badge .line-left {
+      background: linear-gradient(to right, transparent, rgba(251, 191, 36, 0.5));
+    }
+
+    .unidade-badge .line-right {
+      background: linear-gradient(to left, transparent, rgba(251, 191, 36, 0.5));
+    }
+
+    .unidade-badge span {
+      color: #fbbf24;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 8px 16px;
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    /* Individual Section */
+    .individual-section {
+      max-width: 1200px;
+      margin: 60px auto 0;
+      padding: 0 20px;
+    }
+
+    .individual-section h3 {
+      text-align: center;
+      font-size: 1.5rem;
+      margin-bottom: 30px;
+    }
+
+    .individual-section h3 span {
+      color: #fbbf24;
+    }
+
+    .individual-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .individual-card {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 2px solid #374151;
+      transition: border-color 0.3s;
+    }
+
+    .individual-card:hover {
+      border-color: rgba(251, 191, 36, 0.5);
+    }
+
+    .individual-card img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .individual-card .info {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 16px;
+      background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    }
+
+    .individual-card .info strong {
+      color: #fbbf24;
+      font-size: 1.1rem;
+    }
+
+    .individual-card .info p {
+      color: #d1d5db;
+      font-size: 0.85rem;
+    }
+
+    /* Code Section */
+    .code-section {
+      max-width: 800px;
+      margin: 60px auto;
+      padding: 0 20px;
+      text-align: center;
+    }
+
+    .code-section h3 {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+
+    .code-toggle {
+      background: #fbbf24;
+      color: black;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.2s;
+    }
+
+    .code-toggle:hover {
+      background: #f59e0b;
+    }
+
+    .code-block {
+      display: none;
+      margin-top: 24px;
+      background: #111827;
+      border: 1px solid #374151;
+      border-radius: 16px;
+      overflow: hidden;
+      text-align: left;
+    }
+
+    .code-block.show {
+      display: block;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      background: rgba(31, 41, 55, 0.5);
+      border-bottom: 1px solid #374151;
+    }
+
+    .code-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .code-dot.red { background: #ef4444; }
+    .code-dot.yellow { background: #eab308; }
+    .code-dot.green { background: #22c55e; }
+
+    .code-header span {
+      margin-left: 8px;
+      color: #9ca3af;
+      font-size: 0.85rem;
+    }
+
+    .code-content {
+      padding: 24px;
+      overflow-x: auto;
+    }
+
+    .code-content pre {
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: #d1d5db;
+    }
+
+    .code-content .comment { color: #6b7280; }
+    .code-content .selector { color: #c084fc; }
+    .code-content .property { color: #22d3ee; }
+    .code-content .value { color: #fbbf24; }
+    .code-content .keyword { color: #f472b6; }
+    .code-content .highlight { color: #4ade80; }
+
+    /* Tips */
+    .tips-section {
+      max-width: 800px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+
+    .tips-section h3 {
+      text-align: center;
+      font-size: 1.5rem;
+      margin-bottom: 30px;
+    }
+
+    .tip-card {
+      display: flex;
+      gap: 16px;
+      padding: 20px;
+      background: rgba(31, 41, 55, 0.5);
+      border: 1px solid rgba(55, 65, 81, 0.3);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      transition: border-color 0.3s;
+    }
+
+    .tip-card:hover {
+      border-color: rgba(251, 191, 36, 0.3);
+    }
+
+    .tip-icon {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .tip-card h4 {
+      font-size: 1rem;
+      margin-bottom: 4px;
+    }
+
+    .tip-card p {
+      color: #9ca3af;
+      font-size: 0.9rem;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 30px 20px;
+      border-top: 1px solid #1f2937;
+      color: #6b7280;
+      font-size: 0.85rem;
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .unidade-visual {
+        grid-template-columns: 1fr;
+      }
+
+      .divisoria {
+        display: none;
+      }
+
+      .upload-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <h1>3 Imagens → 1 Unidade</h1>
+    <p>Faça upload das suas 3 imagens e veja como elas se unem formando uma composição perfeita em qualquer dispositivo.</p>
+  </header>
+
+  <!-- Upload Section -->
+  <section class="upload-section">
+    <h2>📸 Envie suas <span>3 Imagens</span></h2>
+    <p class="upload-subtitle">Clique ou arraste as imagens para os campos abaixo</p>
+
+    <div class="upload-grid">
+      <div class="upload-box" id="box-0" onclick="document.getElementById('file-0').click()" ondrop="handleDrop(0, event)" ondragover="event.preventDefault()">
+        <input type="file" id="file-0" accept="image/*" onchange="handleUpload(0, event)">
+        <div class="upload-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <span class="upload-label">Imagem 1</span>
+        <span class="upload-hint">Clique ou arraste</span>
+      </div>
+
+      <div class="upload-box" id="box-1" onclick="document.getElementById('file-1').click()" ondrop="handleDrop(1, event)" ondragover="event.preventDefault()">
+        <input type="file" id="file-1" accept="image/*" onchange="handleUpload(1, event)">
+        <div class="upload-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <span class="upload-label">Imagem 2</span>
+        <span class="upload-hint">Clique ou arraste</span>
+      </div>
+
+      <div class="upload-box" id="box-2" onclick="document.getElementById('file-2').click()" ondrop="handleDrop(2, event)" ondragover="event.preventDefault()">
+        <input type="file" id="file-2" accept="image/*" onchange="handleUpload(2, event)">
+        <div class="upload-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <span class="upload-label">Imagem 3</span>
+        <span class="upload-hint">Clique ou arraste</span>
+      </div>
+    </div>
+
+    <div class="success-msg" id="success-msg">
+      <span>✅ Todas as 3 imagens carregadas! Role para ver o resultado ↓</span>
+    </div>
+  </section>
+
+  <!-- Result Section -->
+  <section class="result-section" id="result-section">
+    <h2>✨ Resultado: <span>Composição Unificada</span></h2>
+    <p class="result-subtitle">Passe o mouse sobre os painéis para ver cada imagem individualmente</p>
+
+    <div class="composicao">
+      <div class="unidade-visual" id="unidade-visual">
+        <!-- Imagens serão inseridas via JS -->
+      </div>
+      <div class="divisoria divisoria-1"></div>
+      <div class="divisoria divisoria-2"></div>
+    </div>
+
+    <div class="unidade-badge">
+      <div class="line line-left"></div>
+      <span>✨ 3 imagens independentes = 1 composição unificada</span>
+      <div class="line line-right"></div>
+    </div>
+
+    <!-- Individual -->
+    <div class="individual-section">
+      <h3>🔍 Cada Imagem <span>Individualmente</span></h3>
+      <div class="individual-grid" id="individual-grid">
+        <!-- Cards individuais via JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Code Section -->
+  <section class="code-section">
+    <h3>💻 Código para usar no seu projeto</h3>
+    <button class="code-toggle" onclick="toggleCode()">Mostrar código</button>
+
+    <div class="code-block" id="code-block">
+      <div class="code-header">
+        <div class="code-dot red"></div>
+        <div class="code-dot yellow"></div>
+        <div class="code-dot green"></div>
+        <span>composicao.css</span>
+      </div>
+      <div class="code-content">
+        <pre><span class="comment">/* Container principal - sem gaps! */</span>
+<span class="selector">.unidade-visual</span> {
+  <span class="property">display</span>: <span class="value">grid</span>;
+  <span class="property">grid-template-columns</span>: <span class="value">repeat(3, 1fr)</span>;
+  <span class="property">gap</span>: <span class="value">0</span>;  <span class="highlight">/* ← Sem espaço entre imagens */</span>
+  <span class="property">width</span>: <span class="value">100%</span>;
+  <span class="property">overflow</span>: <span class="value">hidden</span>;
+}
+
+<span class="comment">/* Cada imagem */</span>
+<span class="selector">.unidade-visual img</span> {
+  <span class="property">width</span>: <span class="value">100%</span>;
+  <span class="property">height</span>: <span class="value">auto</span>;
+  <span class="property">display</span>: <span class="value">block</span>;
+  <span class="property">object-fit</span>: <span class="value">cover</span>;
+}
+
+<span class="comment">/* Mobile: empilha verticalmente */</span>
+<span class="keyword">@media</span> (<span class="property">max-width</span>: <span class="value">768px</span>) {
+  <span class="selector">.unidade-visual</span> {
+    <span class="property">grid-template-columns</span>: <span class="value">1fr</span>;
+  }
+}</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tips -->
+  <section class="tips-section">
+    <h3>💡 Dicas para suas imagens</h3>
+
+    <div class="tip-card">
+      <span class="tip-icon">🎨</span>
+      <div>
+        <h4>Planeje as bordas</h4>
+        <p>As bordas das imagens devem se conectar. Use Photoshop para dividir uma imagem panorâmica em 3 partes iguais.</p>
+      </div>
+    </div>
+
+    <div class="tip-card">
+      <span class="tip-icon">📐</span>
+      <div>
+        <h4>Mesma altura</h4>
+        <p>Todas as imagens devem ter a mesma altura para ficarem alinhadas perfeitamente.</p>
+      </div>
+    </div>
+
+    <div class="tip-card">
+      <span class="tip-icon">📱</span>
+      <div>
+        <h4>Teste em mobile</h4>
+        <p>Em telas pequenas as imagens empilham. Verifique se cada imagem funciona bem sozinha.</p>
+      </div>
+    </div>
+
+    <div class="tip-card">
+      <span class="tip-icon">⚡</span>
+      <div>
+        <h4>Otimize o tamanho</h4>
+        <p>Use imagens otimizadas (WebP, compressão) para carregamento rápido em qualquer dispositivo.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>CSS Grid + object-fit: cover = Composição visual perfeita em qualquer dispositivo</p>
+  </footer>
+
+  <script>
+    const images = [null, null, null];
+
+    function handleUpload(index, event) {
+      const file = event.target.files[0];
+      if (file) {
+        readFile(index, file);
+      }
+    }
+
+    function handleDrop(index, event) {
+      event.preventDefault();
+      const file = event.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        readFile(index, file);
+      }
+    }
+
+    function readFile(index, file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        images[index] = e.target.result;
+        updateBox(index);
+        checkAllLoaded();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function updateBox(index) {
+      const box = document.getElementById('box-' + index);
+      if (images[index]) {
+        box.classList.add('has-image');
+        box.innerHTML = `
+          <img src="${images[index]}" alt="Imagem ${index + 1}">
+          <span class="badge">Imagem ${index + 1}</span>
+          <button class="remove-btn" onclick="removeImage(event, ${index})">✕</button>
+          <div class="status">✓ Carregada</div>
+        `;
+      }
+    }
+
+    function removeImage(event, index) {
+      event.stopPropagation();
+      images[index] = null;
+      const box = document.getElementById('box-' + index);
+      box.classList.remove('has-image');
+      box.innerHTML = `
+        <input type="file" id="file-${index}" accept="image/*" onchange="handleUpload(${index}, event)">
+        <div class="upload-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <span class="upload-label">Imagem ${index + 1}</span>
+        <span class="upload-hint">Clique ou arraste</span>
+      `;
+      checkAllLoaded();
+    }
+
+    function checkAllLoaded() {
+      const allLoaded = images.every(img => img !== null);
+      const successMsg = document.getElementById('success-msg');
+      const resultSection = document.getElementById('result-section');
+
+      if (allLoaded) {
+        successMsg.classList.add('show');
+        resultSection.classList.add('show');
+        renderResult();
+      } else {
+        successMsg.classList.remove('show');
+        resultSection.classList.remove('show');
+      }
+    }
+
+    function renderResult() {
+      // Render composição unificada
+      const unidade = document.getElementById('unidade-visual');
+      unidade.innerHTML = images.map((img, i) => `
+        <div class="painel">
+          <img src="${img}" alt="Painel ${i + 1}">
+          <div class="overlay">
+            <span>Imagem ${i + 1}</span>
+          </div>
+        </div>
+      `).join('');
+
+      // Render individual
+      const individual = document.getElementById('individual-grid');
+      individual.innerHTML = images.map((img, i) => `
+        <div class="individual-card">
+          <img src="${img}" alt="Imagem ${i + 1}">
+          <div class="info">
+            <strong>Imagem ${i + 1}</strong>
+            <p>Funciona sozinha e em conjunto</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleCode() {
+      const block = document.getElementById('code-block');
+      const btn = document.querySelector('.code-toggle');
+      block.classList.toggle('show');
+      btn.textContent = block.classList.contains('show') ? 'Ocultar código' : 'Mostrar código';
+    }
+  </script>
+</body>
+</html>
